@@ -4,7 +4,7 @@ namespace bigj {
 namespace unicode {
 
 enum class error_code {
-    ok = 0,
+    ok,
     incomplete_sequence,
     unexpected_code_unit,
     invalid_code_unit,
