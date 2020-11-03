@@ -108,7 +108,14 @@ struct utf8 {
                             ((it[0] & 0x0F)
                             | (it[1] & 0x20))
                         ) {
-                            return error_code::ok;
+                            if (
+                                !((it[0] & 0x0F) == 0x0D
+                                && (it[1] & 0x20))
+                            ) {
+                                return error_code::ok;
+                            } else [[unlikely]] {
+                                return error_code::invalid_code_point;
+                            }
                         } else [[unlikely]] {
                             return error_code::overlong_encoding;
                         }
