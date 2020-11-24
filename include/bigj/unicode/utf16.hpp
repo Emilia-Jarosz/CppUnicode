@@ -1,8 +1,7 @@
 #pragma once
 
+#include "detail/byte_swap.hpp"
 #include "encoding.hpp"
-
-#include <bit>
 
 namespace bigj {
 namespace unicode {
@@ -83,7 +82,7 @@ struct utf16 {
         if constexpr (E == std::endian::native) {
             return u;
         } else {
-            return std::rotl(u, 8);
+            return detail::byte_swap(u);
         }
     }
 };
