@@ -28,7 +28,7 @@ struct utf32 {
 
     static constexpr auto validate(
         const_pointer it,
-        const_pointer end
+        const_pointer
     ) noexcept -> error_code {
         if (*it <= 0x10FFFF && (*it < 0x00D800 || *it > 0x00DFFF)) {
             return error_code::ok;

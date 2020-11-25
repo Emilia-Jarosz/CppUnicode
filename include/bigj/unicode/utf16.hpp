@@ -22,8 +22,8 @@ struct utf16 {
             *it++ = swap_endian(p);
         } else [[unlikely]] {
             p -= 0x010000;
-            *it++ = swap_endian(0xD800 | p >> 10);
-            *it++ = swap_endian(0xDC00 | p & 0x03FF);
+            *it++ = swap_endian(0xD800 | (p >> 10));
+            *it++ = swap_endian(0xDC00 | (p & 0x03FF));
         }
 
         return it;

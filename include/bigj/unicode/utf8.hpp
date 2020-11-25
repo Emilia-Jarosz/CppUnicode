@@ -54,23 +54,17 @@ struct utf8 {
             auto length = std::countl_one(*it);
 
             if (length == 2) {
-                return {
-                    static_cast<code_point>(*it++ & 0x1F) << 6
-                    | static_cast<code_point>(*it & 0x3F)
-                };
+                return static_cast<code_point>(it[0] & 0x1F) << 6
+                    | static_cast<code_point>(it[1] & 0x3F);
             } else if (length == 3) {
-                return {
-                    static_cast<code_point>(*it++ & 0x0F) << 12
-                    | static_cast<code_point>(*it++ & 0x3F) << 6
-                    | static_cast<code_point>(*it & 0x3F)
-                };
+                return static_cast<code_point>(it[0] & 0x0F) << 12
+                    | static_cast<code_point>(it[1] & 0x3F) << 6
+                    | static_cast<code_point>(it[2] & 0x3F);
             } else {
-                return {
-                    static_cast<code_point>(*it++ & 0x07) << 18
-                    | static_cast<code_point>(*it++ & 0x3F) << 12
-                    | static_cast<code_point>(*it++ & 0x3F) << 6
-                    | static_cast<code_point>(*it & 0x3F)
-                };
+                return static_cast<code_point>(it[0] & 0x07) << 18
+                    | static_cast<code_point>(it[1] & 0x3F) << 12
+                    | static_cast<code_point>(it[2] & 0x3F) << 6
+                    | static_cast<code_point>(it[3] & 0x3F);
             }
         }
     }
@@ -142,7 +136,7 @@ struct utf8 {
                         ) {
                             if (
                                 !((it[0] & 0x04)
-                                && (it[0] & 0x03 | it[1] & 0x30))
+                                && ((it[0] & 0x03) | (it[1] & 0x30)))
                             ) {
                                 return error_code::ok;
                             } else [[unlikely]] {
