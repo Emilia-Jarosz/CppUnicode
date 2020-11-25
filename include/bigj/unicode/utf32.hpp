@@ -30,7 +30,9 @@ struct utf32 {
         const_pointer it,
         const_pointer
     ) noexcept -> error_code {
-        if (*it <= 0x10FFFF && (*it < 0x00D800 || *it > 0x00DFFF)) {
+        auto u = swap_endian(*it);
+
+        if (u <= 0x10FFFF && (u < 0x00D800 || u > 0x00DFFF)) {
             return error_code::ok;
         } else [[unlikely]] {
             return error_code::invalid_code_point;
