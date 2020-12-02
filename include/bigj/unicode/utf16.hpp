@@ -35,11 +35,9 @@ struct utf16 {
         } else [[unlikely]] {
             auto w2 = swap_endian(*it);
 
-            return {
-                (static_cast<code_point>(w1 & 0x03FF) << 10
+            return (static_cast<code_point>(w1 & 0x03FF) << 10
                 | static_cast<code_point>(w2 & 0x03FF))
-                + 0x010000
-            };
+                + 0x010000;
         }
     }
 
