@@ -40,9 +40,7 @@ struct iterator {
         return tmp;
     }
 
-    constexpr auto operator<=>(iterator& other) const noexcept {
-        return m_ptr <=> other.m_ptr;
-    }
+    constexpr auto operator<=>(const iterator& other) const noexcept = default;
 
     constexpr auto data() const noexcept -> const code_unit* {
         return m_ptr;
