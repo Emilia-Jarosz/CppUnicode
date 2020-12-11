@@ -10,7 +10,7 @@ namespace bigj {
 template<unicode::encoding E>
 struct basic_string_view {
 
-    using code_unit = E::code_unit;
+    using code_unit = typename E::code_unit;
     using value_type = unicode::code_point;
     using const_pointer = const code_unit*;
     using pointer = const_pointer;
@@ -29,7 +29,9 @@ struct basic_string_view {
         size_type length = 0;
 
         for (auto it = ptr; it != end; it = E::next_code_point(it), ++length) {
-            if (E::validate(it, end) != unicode::error_code::ok) [[unlikely]] {
+            auto ec = E::validate(it, end);
+            
+            if (ec != unicode::error_code::ok) [[unlikely]] {
                 throw unicode::parse_error{ec};
             }
         }
