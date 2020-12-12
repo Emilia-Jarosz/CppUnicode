@@ -4,6 +4,7 @@
 #include "unicode/iterator.hpp"
 
 #include <iterator>
+#include <memory>
 
 namespace bigj {
 
@@ -40,6 +41,12 @@ struct basic_string_view {
         m_size = end - ptr;
         m_length = length;
     }
+
+    template<std::contiguous_iterator It, std::sized_sentinel_for<It> End>
+        requires std::same_as<typename std::iterator_traits<It>::value_type, code_unit>
+            && (not std::convertible_to<End, size_type>)
+    constexpr basic_string_view(It begin, End end)
+        : basic_string_view{std::to_address(begin), std::to_address(end)} {}
 
     constexpr basic_string_view(const_pointer ptr, size_type size)
         : basic_string_view{ptr, ptr + size} {}
