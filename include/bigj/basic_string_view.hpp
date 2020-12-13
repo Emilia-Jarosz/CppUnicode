@@ -63,15 +63,7 @@ struct basic_string_view {
         return const_iterator{m_ptr};
     }
 
-    constexpr auto cbegin() const noexcept {
-        return const_iterator{m_ptr};
-    }
-
     constexpr auto end() const noexcept {
-        return const_iterator{m_ptr + m_size};
-    }
-
-    constexpr auto cend() const noexcept {
         return const_iterator{m_ptr + m_size};
     }
 
@@ -79,16 +71,24 @@ struct basic_string_view {
         return const_reverse_iterator{end()};
     }
 
-    constexpr auto crbegin() const noexcept {
-        return const_reverse_iterator{cend()};
-    }
-
     constexpr auto rend() const noexcept {
         return const_reverse_iterator{begin()};
     }
 
+    constexpr auto cbegin() const noexcept {
+        return begin();
+    }
+
+    constexpr auto cend() const noexcept {
+        return end();
+    }
+
+    constexpr auto crbegin() const noexcept {
+        return rbegin();
+    }
+
     constexpr auto crend() const noexcept {
-        return const_reverse_iterator{cbegin()};
+        return rend();
     }
 
     // Element access
