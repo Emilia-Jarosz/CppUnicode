@@ -1,7 +1,7 @@
 #pragma once
 
-#include "detail/byte_swap.hpp"
-#include "encoding.hpp"
+#include "../detail/byte_swap.hpp"
+#include "../encoding.hpp"
 
 namespace bigj {
 namespace unicode {
