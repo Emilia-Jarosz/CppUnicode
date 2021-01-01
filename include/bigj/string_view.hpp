@@ -1,9 +1,9 @@
 #pragma once
 
 #include "basic_string_view.hpp"
-#include "unicode/utf8.hpp"
-#include "unicode/utf16.hpp"
-#include "unicode/utf32.hpp"
+#include "unicode/encoding/utf8.hpp"
+#include "unicode/encoding/utf16.hpp"
+#include "unicode/encoding/utf32.hpp"
 
 namespace bigj {
 
