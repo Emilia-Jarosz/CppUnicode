@@ -57,3 +57,17 @@ struct iterator {
 
 } // namespace unicode
 } // namespace bigj
+
+namespace std {
+
+template<bigj::unicode::encoding E>
+struct iterator_traits<bigj::unicode::iterator<E>> {
+
+    using difference_type = ptrdiff_t;
+    using value_type = bigj::unicode::code_point;
+    using pointer = const typename E::code_unit*;
+    using reference = const bigj::unicode::code_point&;
+    using iterator_category = std::bidirectional_iterator_tag;
+};
+
+} // namespace std
