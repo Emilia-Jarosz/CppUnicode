@@ -2,6 +2,8 @@
 
 #include "encoding.hpp"
 
+#include <iterator>
+
 namespace bigj {
 namespace unicode {
 
@@ -9,10 +11,13 @@ template<encoding E>
 struct iterator {
 
     using code_unit = typename E::code_unit;
-    using value_type = code_point;
 
-    constexpr iterator() noexcept : m_ptr{nullptr} {}
-    explicit constexpr iterator(const code_unit* ptr) noexcept : m_ptr{ptr} {}
+    using value_type = code_point;
+    using pointer = const code_unit*;
+    using iterator_category = std::bidirectional_iterator_tag;
+
+    constexpr iterator() noexcept {}
+    explicit constexpr iterator(pointer ptr) noexcept : m_ptr{ptr} {}
 
     constexpr auto operator*() const noexcept -> value_type {
         return E::decode(m_ptr);
@@ -40,14 +45,14 @@ struct iterator {
         return tmp;
     }
 
-    constexpr auto operator<=>(const iterator& other) const noexcept = default;
+    constexpr auto operator<=>(const iterator&) const noexcept = default;
 
-    constexpr auto data() const noexcept -> const code_unit* {
+    constexpr auto base() const noexcept -> const code_unit* {
         return m_ptr;
     }
 
   private:
-    const code_unit* m_ptr;
+    pointer m_ptr = nullptr;
 };
 
 } // namespace unicode
