@@ -14,8 +14,6 @@ struct parse_error : std::exception {
 
     virtual auto what() const noexcept -> const char* override {
         switch (code) {
-          case error_code::ok:
-            return "no error";
           case error_code::incomplete_sequence:
             return "incomplete code unit sequence";
           case error_code::unexpected_code_unit:
@@ -26,6 +24,9 @@ struct parse_error : std::exception {
             return "code point with overlong encoding";
           case error_code::invalid_code_point:
             return "invalid code point";
+            
+          default:
+            return "unknown error";
         }
     }
 
