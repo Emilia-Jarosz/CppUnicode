@@ -27,11 +27,11 @@ set(CPP_UNICODE_HEADER_FILES
     unicode/detail/byte_swap.hpp
     unicode/detail/error_code.hpp
     unicode/detail/exceptions.hpp
+    unicode/encoding/utf8.hpp
+    unicode/encoding/utf16.hpp
+    unicode/encoding/utf32.hpp
     unicode/encoding.hpp
     unicode/iterator.hpp
-    unicode/utf8.hpp
-    unicode/utf16.hpp
-    unicode/utf32.hpp
     basic_string_view.hpp
 )
 
