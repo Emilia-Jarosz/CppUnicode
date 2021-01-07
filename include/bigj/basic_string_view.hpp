@@ -2,8 +2,8 @@
 
 #include "unicode/detail/exceptions.hpp"
 #include "unicode/iterator.hpp"
+#include "unicode/reverse_iterator.hpp"
 
-#include <iterator>
 #include <memory>
 
 namespace bigj {
@@ -14,10 +14,10 @@ struct basic_string_view {
     using code_unit = typename E::code_unit;
     using value_type = unicode::code_point;
     using const_pointer = const code_unit*;
-    using pointer = const_pointer;
+    using pointer = code_unit*;
     using const_iterator = unicode::iterator<E>;
     using iterator = const_iterator;
-    using const_reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = unicode::reverse_iterator<E>;
     using reverse_iterator = const_reverse_iterator;
     using size_type = size_t;
     using difference_type = ptrdiff_t;
@@ -68,11 +68,11 @@ struct basic_string_view {
     }
 
     constexpr auto rbegin() const noexcept {
-        return const_reverse_iterator{end()};
+        return const_reverse_iterator{m_ptr + m_size, m_ptr};
     }
 
     constexpr auto rend() const noexcept {
-        return const_reverse_iterator{begin()};
+        return const_reverse_iterator{m_ptr, m_ptr};
     }
 
     constexpr auto cbegin() const noexcept {
@@ -124,7 +124,7 @@ struct basic_string_view {
     }
 
   private:
-    const code_unit* m_ptr = nullptr;
+    const_pointer m_ptr = nullptr;
     size_type m_size = 0;
     size_type m_length = 0;
 };
