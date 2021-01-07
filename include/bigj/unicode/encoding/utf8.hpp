@@ -157,7 +157,11 @@ struct utf8 {
                         }
                     }
                 } else [[unlikely]] {
-                    return error_code::invalid_code_unit;
+                    if (length == 1) {
+                        return error_code::unexpected_code_unit;
+                    } else {
+                        return error_code::invalid_code_unit;
+                    }
                 }
             } else [[unlikely]] {
                 return error_code::incomplete_sequence;
