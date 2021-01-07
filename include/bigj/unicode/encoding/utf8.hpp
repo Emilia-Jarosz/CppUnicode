@@ -78,7 +78,7 @@ struct utf8 {
         } else [[unlikely]] {
             auto length = std::countl_one(*it);
 
-            if (it + length <= end) {
+            if (end - it >= length) {
                 if (length == 2) {
                     if ((it[1] & 0xC0) == 0x80) {
                         if (it[0] & 0x1E) {
