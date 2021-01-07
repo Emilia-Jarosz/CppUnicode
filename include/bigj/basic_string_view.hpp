@@ -45,6 +45,8 @@ struct basic_string_view {
     template<std::contiguous_iterator It, std::sized_sentinel_for<It> End>
         requires std::same_as<typename std::iterator_traits<It>::value_type, code_unit>
             && (not std::convertible_to<End, size_type>)
+            && (not std::same_as<It, pointer>)
+            && (not std::same_as<It, const_pointer>)
     constexpr basic_string_view(It begin, End end)
         : basic_string_view{std::to_address(begin), std::to_address(end)} {}
 
