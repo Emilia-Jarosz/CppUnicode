@@ -30,7 +30,7 @@ struct iterator {
 
     constexpr auto operator++(int) noexcept -> iterator {
         auto tmp = *this;
-        m_ptr = E::next_code_point(m_ptr);
+        ++(*this);
         return tmp;
     }
 
@@ -41,13 +41,13 @@ struct iterator {
 
     constexpr auto operator--(int) noexcept -> iterator {
         auto tmp = *this;
-        m_ptr = E::prev_code_point(m_ptr);
+        --(*this);
         return tmp;
     }
 
     constexpr auto operator<=>(const iterator&) const noexcept = default;
 
-    constexpr auto base() const noexcept -> const code_unit* {
+    constexpr auto base() const noexcept -> pointer {
         return m_ptr;
     }
 
