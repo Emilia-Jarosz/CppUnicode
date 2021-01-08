@@ -1,16 +1,12 @@
 #pragma once
 
+#include "code_point.hpp"
 #include "detail/error_code.hpp"
 
-#include <concepts>
-
 #include <cstddef>
-#include <cstdint>
 
 namespace bigj {
 namespace unicode {
-
-using code_point = uint32_t;
 
 template<typename T>
 concept encoding = requires { typename T::code_unit; } && requires (

@@ -14,10 +14,10 @@ using namespace bigj::unicode;
 
 using code_unit = uint8_t;
 
-using cp_iota_view = std::ranges::iota_view<code_point, code_point>;
+using cp_iota_view = std::ranges::iota_view<uint32_t, uint32_t>;
 using cu_iota_view = std::ranges::iota_view<code_unit, code_unit>;
 
-using cp_range = std::array<code_point, 2>;
+using cp_range = std::array<uint32_t, 2>;
 
 TEST_CASE("UTF-8 encoding / decoding / iteration", "[utf][utf8]") {
     auto [range, size, mask, test] = GENERATE(

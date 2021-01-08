@@ -20,16 +20,16 @@ class RandomStringGenerator final
         using utf32 = utf32<std::endian::native>;
 
         return filter(
-            [](code_point cp) {
+            [](uint32_t cp) {
                 return utf32::validate(&cp, &cp + 1) == error_code::ok;
             },
-            random<code_point>(0, 0x10FFFF)
+            random<uint32_t>(0, 0x10FFFF)
         );
     }
 
   public:
 
-    RandomStringGenerator(size_t length) : m_code_point_rng {make_rng()}, m_length {length} {
+    RandomStringGenerator(size_t length) : m_rng {make_rng()}, m_length {length} {
         next();
     }
 
@@ -42,8 +42,8 @@ class RandomStringGenerator final
         str.reserve(m_length);
 
         for (size_t i = 0; i < m_length; i++) {
-            auto cp = m_code_point_rng.get();
-            m_code_point_rng.next();
+            auto cp = m_rng.get();
+            m_rng.next();
 
             auto prev_size = str.size();
             str.resize(str.size() + E::encoded_size(cp));
@@ -55,7 +55,7 @@ class RandomStringGenerator final
     }
 
   private:
-    Catch::Generators::GeneratorWrapper<code_point> m_code_point_rng;
+    Catch::Generators::GeneratorWrapper<uint32_t> m_rng;
     const size_t m_length;
     std::vector<code_unit> m_string;
 };
