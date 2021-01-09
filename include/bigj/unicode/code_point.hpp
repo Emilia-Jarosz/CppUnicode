@@ -18,6 +18,8 @@ struct code_point {
     constexpr operator uint32_t() const noexcept { return m_value; }
     constexpr auto value() const noexcept -> uint32_t { return m_value; }
 
+    constexpr auto plane() const noexcept -> uint32_t { return m_value >> 16; }
+
   private:
     uint32_t m_value = 0;
 };
