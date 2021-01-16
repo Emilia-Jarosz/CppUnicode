@@ -1,6 +1,6 @@
 #pragma once
 
-#include "unicode/detail/exceptions.hpp"
+#include "unicode/detail/validate_string.hpp"
 #include "unicode/iterator.hpp"
 #include "unicode/reverse_iterator.hpp"
 
@@ -27,15 +27,7 @@ struct basic_string_view {
     constexpr basic_string_view(const_pointer ptr, const_pointer end) {
         if (ptr >= end) return;
 
-        size_type length = 0;
-
-        for (auto it = ptr; it != end; it = E::next_code_point(it), ++length) {
-            auto ec = E::validate(it, end);
-            
-            if (ec != unicode::error_code::ok) [[unlikely]] {
-                throw unicode::parse_error{ec};
-            }
-        }
+        auto length = unicode::detail::validate_string<E>(ptr, end);
 
         m_ptr = ptr;
         m_size = end - ptr;
