@@ -1,15 +1,15 @@
 #pragma once
 
-#include "unicode/detail/validate_string.hpp"
-#include "unicode/iterator.hpp"
-#include "unicode/reverse_iterator.hpp"
+#include "basic_string_view.hpp"
 
-#include <memory>
+#include <utility>
+
+#include <cstring>
 
 namespace bigj {
 
 template<unicode::encoding E>
-struct basic_string_view {
+struct basic_string {
 
     using code_unit = typename E::code_unit;
     using value_type = unicode::code_point;
@@ -22,14 +22,17 @@ struct basic_string_view {
     using size_type = size_t;
     using difference_type = ptrdiff_t;
 
-    constexpr basic_string_view() noexcept {}
+    basic_string() noexcept {}
 
-    constexpr basic_string_view(const_pointer ptr, const_pointer end) {
+    basic_string(const_pointer ptr, const_pointer end) {
         if (ptr >= end) return;
-
+        
         auto length = unicode::detail::validate_string<E>(ptr, end);
 
-        m_ptr = ptr;
+        auto new_ptr = new code_unit[end - ptr];
+        std::memcpy(new_ptr, ptr, end - ptr);
+
+        m_ptr = new_ptr;
         m_size = end - ptr;
         m_length = length;
     }
@@ -39,17 +42,66 @@ struct basic_string_view {
             && (not std::convertible_to<End, size_type>)
             && (not std::same_as<It, pointer>)
             && (not std::same_as<It, const_pointer>)
-    constexpr basic_string_view(It begin, End end)
-        : basic_string_view{std::to_address(begin), std::to_address(end)} {}
+    basic_string(It begin, End end)
+        : basic_string{std::to_address(begin), std::to_address(end)} {}
 
-    constexpr basic_string_view(const_pointer ptr, size_type size)
-        : basic_string_view{ptr, ptr + size} {}
+    basic_string(const_pointer ptr, size_type size)
+        : basic_string{ptr, ptr + size} {}
 
-    constexpr basic_string_view(const basic_string_view&) noexcept = default;
-    constexpr basic_string_view(basic_string_view&&) noexcept = default;
+    template<unicode::encoding F>
+    basic_string(const basic_string_view<F> other) {
+        if (other.empty()) return;
 
-    constexpr basic_string_view& operator=(const basic_string_view&) noexcept = default;
-    constexpr basic_string_view& operator=(basic_string_view&&) noexcept = default;
+        if constexpr (std::same_as<E, F>) {
+            auto new_ptr = new code_unit[other.m_size];
+            std::memcpy(new_ptr, other.m_ptr, other.m_size);
+
+            m_ptr = new_ptr;
+            m_size = other.m_size;
+            m_length = other.m_length;
+        } else {
+            auto size = 0;
+
+            for (auto cp : other) {
+                size += E::encoded_size(cp);
+            }
+
+            m_ptr = new code_unit[size];
+            m_size = size;
+            m_length = other.m_length;
+
+            auto ptr = m_ptr;
+
+            for (auto cp : other) {
+                ptr = E::encode(cp, ptr);
+            }
+        }
+    }
+
+    basic_string(const basic_string& other) noexcept {
+        auto new_ptr = new code_unit[other.m_size];
+        std::memcpy(new_ptr, other.m_ptr, other.m_size);
+
+        m_ptr = new_ptr;
+        m_size = other.m_size;
+        m_length = other.m_length;
+    }
+
+    basic_string(basic_string&& other) noexcept
+        : m_ptr {std::exchange(other.m_ptr, nullptr)}
+        , m_size {std::exchange(other.m_size, 0)}
+        , m_length {std::exchange(other.m_length, 0)} {}
+
+    basic_string& operator=(basic_string other) {
+        swap(other);
+        return *this;
+    }
+
+    ~basic_string() noexcept {
+        if (not empty()) {
+            delete[] m_ptr;
+        }
+    }
 
     // Iterators
 
@@ -99,6 +151,16 @@ struct basic_string_view {
         return m_ptr;
     }
 
+    constexpr operator basic_string_view<E>() const noexcept {
+        auto view = basic_string_view<E> {};
+
+        view.m_ptr = m_ptr;
+        view.m_size = m_size;
+        view.m_length = m_length;
+
+        return view;
+    }
+
     // Capacity
 
     constexpr auto size() const noexcept -> size_type {
@@ -117,9 +179,15 @@ struct basic_string_view {
         return m_size == 0;
     }
 
-  private:
-    template<unicode::encoding F> friend class basic_string;
+    // Modifiers
 
+    constexpr auto swap(basic_string& other) noexcept {
+        std::swap(m_ptr, other.m_ptr);
+        std::swap(m_size, other.m_size);
+        std::swap(m_length, other.m_length);
+    }
+
+  private:
     const_pointer m_ptr = nullptr;
     size_type m_size = 0;
     size_type m_length = 0;
