@@ -43,7 +43,7 @@ TEST_CASE("String view properties", "[string_view]") {
     REQUIRE(str.data() == data.data());
 }
 
-TEST_CASE("String view constructors", "[string_view]") {
+TEST_CASE("String view validating constructors", "[string_view]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
