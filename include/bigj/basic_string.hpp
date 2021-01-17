@@ -49,7 +49,7 @@ struct basic_string {
         : basic_string{ptr, ptr + size} {}
 
     template<unicode::encoding F>
-    basic_string(const basic_string_view<F> other) {
+    basic_string(basic_string_view<F> other) {
         if (other.empty()) return;
 
         if constexpr (std::same_as<E, F>) {
@@ -66,17 +66,21 @@ struct basic_string {
                 size += E::encoded_size(cp);
             }
 
-            m_ptr = new code_unit[size];
+            auto ptr = new code_unit[size];
+
+            m_ptr = ptr;
             m_size = size;
             m_length = other.m_length;
-
-            auto ptr = m_ptr;
 
             for (auto cp : other) {
                 ptr = E::encode(cp, ptr);
             }
         }
     }
+
+    template<unicode::encoding F>
+    basic_string(const basic_string<F>& other)
+        : basic_string{(basic_string_view<F>) other} {}
 
     basic_string(const basic_string& other) noexcept {
         auto new_ptr = new code_unit[other.m_size];
