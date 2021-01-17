@@ -18,6 +18,7 @@ set(CPP_UNICODE_TEST_SOURCE_FILES
     iterator.cpp
     reverse_iterator.cpp
     string_view.cpp
+    string.cpp
 )
 
 list(TRANSFORM CPP_UNICODE_TEST_SOURCE_FILES PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/src/")
