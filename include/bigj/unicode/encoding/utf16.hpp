@@ -3,6 +3,8 @@
 #include "../detail/byte_swap.hpp"
 #include "../encoding.hpp"
 
+#include <bit>
+
 namespace bigj {
 namespace unicode {
 
