@@ -30,7 +30,7 @@ struct basic_string {
         auto length = unicode::detail::validate_string<E>(ptr, end);
 
         auto new_ptr = new code_unit[end - ptr];
-        std::memcpy(new_ptr, ptr, end - ptr);
+        std::memcpy(new_ptr, ptr, (end - ptr) * sizeof(code_unit));
 
         m_ptr = new_ptr;
         m_size = end - ptr;
@@ -54,7 +54,7 @@ struct basic_string {
 
         if constexpr (std::same_as<E, F>) {
             auto new_ptr = new code_unit[other.m_size];
-            std::memcpy(new_ptr, other.m_ptr, other.m_size);
+            std::memcpy(new_ptr, other.m_ptr, other.m_size * sizeof(code_unit));
 
             m_ptr = new_ptr;
             m_size = other.m_size;
@@ -84,7 +84,7 @@ struct basic_string {
 
     basic_string(const basic_string& other) noexcept {
         auto new_ptr = new code_unit[other.m_size];
-        std::memcpy(new_ptr, other.m_ptr, other.m_size);
+        std::memcpy(new_ptr, other.m_ptr, other.m_size * sizeof(code_unit));
 
         m_ptr = new_ptr;
         m_size = other.m_size;
