@@ -47,7 +47,7 @@ struct iterator {
 
     constexpr auto operator<=>(const iterator&) const noexcept = default;
 
-    constexpr auto base() const noexcept -> pointer {
+    constexpr auto address() const noexcept -> pointer {
         return m_ptr;
     }
 

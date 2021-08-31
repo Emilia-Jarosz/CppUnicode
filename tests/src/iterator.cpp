@@ -18,7 +18,7 @@ using iterator = unicode::iterator<utf8>;
 TEST_CASE("Default iterator is equal to nullptr", "[iterator]") {
     constexpr auto it = iterator {};
 
-    STATIC_REQUIRE(it.base() == nullptr);
+    STATIC_REQUIRE(it.address() == nullptr);
 }
 
 TEST_CASE("Iterator properties", "[iterator]") {
@@ -40,9 +40,9 @@ TEST_CASE("Iterator properties", "[iterator]") {
         REQUIRE(*it_2 == code_points[1]);
     }
 
-    SECTION("base") {
-        CHECK(it_1.base() == data.data());
-        REQUIRE(it_2.base() == data.data() + length_1);
+    SECTION("address") {
+        CHECK(it_1.address() == data.data());
+        REQUIRE(it_2.address() == data.data() + length_1);
     }
 
     SECTION("comparison") {
@@ -57,7 +57,7 @@ TEST_CASE("Iterator properties", "[iterator]") {
         CHECK(it_3 == it_1);
         CHECK(++it_3 == it_2);
         CHECK(it_3 == it_2);
-        REQUIRE(it_3.base() == data.data() + length_1);
+        REQUIRE(it_3.address() == data.data() + length_1);
     }
 
     SECTION("post-increment") {
@@ -66,7 +66,7 @@ TEST_CASE("Iterator properties", "[iterator]") {
         CHECK(it_3 == it_1);
         CHECK(it_3++ == it_1);
         CHECK(it_3 == it_2);
-        REQUIRE(it_3.base() == data.data() + length_1);
+        REQUIRE(it_3.address() == data.data() + length_1);
     }
 
     SECTION("pre-decrement") {
@@ -75,7 +75,7 @@ TEST_CASE("Iterator properties", "[iterator]") {
         CHECK(it_3 == it_2);
         CHECK(--it_3 == it_1);
         CHECK(it_3 == it_1);
-        REQUIRE(it_3.base() == data.data());
+        REQUIRE(it_3.address() == data.data());
     }
 
     SECTION("post-decrement") {
@@ -84,6 +84,6 @@ TEST_CASE("Iterator properties", "[iterator]") {
         CHECK(it_3 == it_2);
         CHECK(it_3-- == it_2);
         CHECK(it_3 == it_1);
-        REQUIRE(it_3.base() == data.data());
+        REQUIRE(it_3.address() == data.data());
     }
 }

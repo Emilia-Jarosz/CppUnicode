@@ -25,7 +25,7 @@ struct reverse_iterator {
     }
 
     explicit constexpr reverse_iterator(iterator_type it, iterator_type last) noexcept
-        : reverse_iterator{it.base(), last.base()} {}
+        : reverse_iterator{it.address(), last.address()} {}
 
     constexpr auto operator*() const noexcept -> value_type {
         return E::decode(m_ptr);
