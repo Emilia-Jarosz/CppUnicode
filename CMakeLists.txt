@@ -24,7 +24,7 @@ set(CPPUNICODE_TARGET_NAME "${PROJECT_NAME}")
 ######################
 
 set(CPPUNICODE_HEADER_FILES
-    unicode/detail/byte_swap.hpp
+    unicode/detail/endian.hpp
     unicode/detail/error_code.hpp
     unicode/detail/exceptions.hpp
     unicode/encoding/utf8.hpp

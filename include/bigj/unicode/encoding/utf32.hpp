@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../detail/byte_swap.hpp"
+#include "../detail/endian.hpp"
 #include "../encoding.hpp"
 
 namespace bigj {
