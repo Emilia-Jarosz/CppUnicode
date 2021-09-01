@@ -3,12 +3,12 @@
 #include "../detail/byte_swap.hpp"
 #include "../encoding.hpp"
 
-#include <bit>
-
 namespace bigj {
 namespace unicode {
 
 template<std::endian E>
+    requires (E == std::endian::native)
+    || (detail::big_or_little<E> && detail::big_or_little<std::endian::native>)
 struct utf16 {
 
     using code_unit = uint16_t;

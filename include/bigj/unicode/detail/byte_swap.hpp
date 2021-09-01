@@ -1,10 +1,16 @@
 #pragma once
 
+#include <bit>
+
 #include <cstdint>
 
 namespace bigj {
 namespace unicode {
 namespace detail {
+
+template<std::endian E>
+concept big_or_little =
+    E == std::endian::big || E == std::endian::little;
 
 constexpr auto byte_swap(uint16_t x) noexcept -> uint16_t {
     return (x << 8) | (x >> 8);
