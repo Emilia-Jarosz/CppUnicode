@@ -278,9 +278,11 @@ struct basic_string {
 
         auto allocation_size = sizeof(ref_count) + sizeof(code_unit) * code_unit_count;
         auto ptr = operator new(allocation_size);
+        auto str_ptr = reinterpret_cast<pointer>(
+            static_cast<std::byte*>(ptr) + sizeof(ref_count));
 
         m_large.refs = new(ptr) ref_count {1};
-        m_large.begin = static_cast<pointer>(ptr + sizeof(ref_count));
+        m_large.begin = str_ptr;
         m_large.end = m_large.begin + size;
         m_large.length(0);
 
