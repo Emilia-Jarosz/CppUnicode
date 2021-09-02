@@ -106,17 +106,14 @@ TEST_CASE("String copy and move constructors", "[string]") {
     }
 
     SECTION("move constructor") {
-        auto ptr_1 = str_1.code_units().data();
-        auto size_1 = str_1.code_units().size();
-        auto length_1 = str_1.length();
+        auto size = str_1.code_units().size();
+        auto length = str_1.length();
 
         auto str_2 = string {std::move(str_1)};
 
-        CHECK(str_2.code_units().data() == ptr_1);
-        CHECK(str_2.code_units().size() == size_1);
-        CHECK(str_2.length() == length_1);
+        CHECK(str_2.code_units().size() == size);
+        CHECK(str_2.length() == length);
 
-        CHECK(str_1.code_units().data() == nullptr);
         CHECK(str_1.code_units().size() == 0);
         CHECK(str_1.length() == 0);
     }
@@ -138,17 +135,14 @@ TEST_CASE("String copy and move assignment", "[string]") {
     }
 
     SECTION("move assignment") {
-        auto ptr_1 = str_1.code_units().data();
-        auto size_1 = str_1.code_units().size();
-        auto length_1 = str_1.length();
+        auto size = str_1.code_units().size();
+        auto length = str_1.length();
 
         str_2 = std::move(str_1);
 
-        CHECK(str_2.code_units().data() == ptr_1);
-        CHECK(str_2.code_units().size() == size_1);
-        CHECK(str_2.length() == length_1);
+        CHECK(str_2.code_units().size() == size);
+        CHECK(str_2.length() == length);
 
-        CHECK(str_1.code_units().data() == nullptr);
         CHECK(str_1.code_units().size() == 0);
         CHECK(str_1.length() == 0);
     }
@@ -175,23 +169,19 @@ TEST_CASE("String swap", "[string]") {
 
     auto str_1 = string {data_1.data(), data_1.data() + data_1.size()};
 
-    auto ptr_1 = str_1.code_units().data();
     auto size_1 = str_1.code_units().size();
     auto length_1 = str_1.length();
 
     auto str_2 = string {data_2.data(), data_2.data() + data_2.size()};
 
-    auto ptr_2 = str_2.code_units().data();
     auto size_2 = str_2.code_units().size();
     auto length_2 = str_2.length();
 
     str_1.swap(str_2);
 
-    CHECK(str_1.code_units().data() == ptr_2);
     CHECK(str_1.code_units().size() == size_2);
     CHECK(str_1.length() == length_2);
 
-    CHECK(str_2.code_units().data() == ptr_1);
     CHECK(str_2.code_units().size() == size_1);
     CHECK(str_2.length() == length_1);
 }

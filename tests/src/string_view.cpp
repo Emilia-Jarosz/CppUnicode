@@ -27,7 +27,7 @@ TEST_CASE("String view properties", "[string_view]") {
     REQUIRE_NOTHROW(str = string_view {data.data(), data.data() + data.size()});
 
     CHECK_FALSE(str.empty());
-    CHECK(str.size() == data.size());
+    CHECK(str.code_units().size() == data.size());
     REQUIRE(str.length() == length);
 
     CHECK(std::distance(str.cbegin(), str.cend()) == (ptrdiff_t)length);
