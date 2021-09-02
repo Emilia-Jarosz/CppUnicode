@@ -12,6 +12,7 @@ endif()
 
 option(CPPUNICODE_BUILD_TESTS "Generate rule to build tests when used as a submodule." OFF)
 option(CPPUNICODE_INSTALL "Generate install rule." ON)
+option(CPPUNICODE_NULL_TERMINATORS "Null terminate the strings and allow c_str()." OFF)
 
 #################
 # Configuration #
@@ -41,6 +42,7 @@ add_library(${CPPUNICODE_TARGET_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${CPPUNICODE_TARGET_NAME} ALIAS ${CPPUNICODE_TARGET_NAME})
 
 target_compile_features(${CPPUNICODE_TARGET_NAME} INTERFACE cxx_std_20)
+target_compile_definitions(${CPPUNICODE_TARGET_NAME} INTERFACE CPPUNICODE_NULL_TERMINATORS=$<BOOL:${CPPUNICODE_NULL_TERMINATORS}>)
 
 target_include_directories(${CPPUNICODE_TARGET_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
 target_include_directories(${CPPUNICODE_TARGET_NAME} SYSTEM INTERFACE $<INSTALL_INTERFACE:include/>)

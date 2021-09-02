@@ -4,7 +4,9 @@
 #include "unicode/iterator.hpp"
 #include "unicode/reverse_iterator.hpp"
 
-#include <memory>
+#include <iterator>
+
+#include <cassert>
 
 namespace bigj {
 
@@ -22,25 +24,19 @@ struct basic_string_view {
     using size_type = size_t;
     using difference_type = ptrdiff_t;
 
-    constexpr basic_string_view() noexcept {}
+    constexpr basic_string_view() noexcept = default;
 
-    constexpr basic_string_view(const_pointer ptr, const_pointer end) {
-        if (ptr >= end) return;
+    constexpr basic_string_view(const_pointer begin, const_pointer end) {
+        assert(begin <= end);
 
-        auto length = unicode::detail::validate_string<E>(ptr, end);
+        unicode::detail::validate_string<E>(begin, end);
 
-        m_ptr = ptr;
-        m_size = end - ptr;
-        m_length = length;
+        m_begin = begin;
+        m_end = end;
     }
 
-    template<std::contiguous_iterator It, std::sized_sentinel_for<It> End>
-        requires std::same_as<typename std::iterator_traits<It>::value_type, code_unit>
-            && (not std::convertible_to<End, size_type>)
-            && (not std::same_as<It, pointer>)
-            && (not std::same_as<It, const_pointer>)
-    constexpr basic_string_view(It begin, End end)
-        : basic_string_view{std::to_address(begin), std::to_address(end)} {}
+    constexpr basic_string_view(const_iterator begin, const_iterator end)
+        : basic_string_view {begin.address(), end.address()} {}
 
     constexpr basic_string_view(const_pointer ptr, size_type size)
         : basic_string_view{ptr, ptr + size} {}
@@ -54,19 +50,19 @@ struct basic_string_view {
     // Iterators
 
     constexpr auto begin() const noexcept {
-        return const_iterator{m_ptr};
+        return const_iterator{m_begin};
     }
 
     constexpr auto end() const noexcept {
-        return const_iterator{m_ptr + m_size};
+        return const_iterator{m_end};
     }
 
     constexpr auto rbegin() const noexcept {
-        return const_reverse_iterator{m_ptr + m_size, m_ptr};
+        return const_reverse_iterator{m_end, m_begin};
     }
 
     constexpr auto rend() const noexcept {
-        return const_reverse_iterator{m_ptr, m_ptr};
+        return const_reverse_iterator{m_begin, m_begin};
     }
 
     constexpr auto cbegin() const noexcept {
@@ -95,34 +91,27 @@ struct basic_string_view {
         return *rbegin();
     }
 
-    constexpr auto data() const noexcept -> const_pointer {
-        return m_ptr;
-    }
-
     // Capacity
 
-    constexpr auto size() const noexcept -> size_type {
-        return m_size;
+    [[nodiscard]] constexpr auto empty() const noexcept -> bool {
+        return m_begin == m_end;
     }
 
     constexpr auto length() const noexcept -> size_type {
-        return m_length;
+        return std::distance(begin(), end());
+    }
+
+    constexpr auto size() const noexcept -> size_type {
+        return length();
     }
 
     constexpr auto max_size() const noexcept -> size_type {
         return std::numeric_limits<size_type>::max() / sizeof(code_unit);
     }
 
-    [[nodiscard]] constexpr auto empty() const noexcept -> bool {
-        return m_size == 0;
-    }
-
   private:
-    template<unicode::encoding F> friend class basic_string;
-
-    const_pointer m_ptr = nullptr;
-    size_type m_size = 0;
-    size_type m_length = 0;
+    const_pointer m_begin = nullptr;
+    const_pointer m_end = nullptr;
 };
 
 } // namespace bigj
