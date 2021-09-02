@@ -10,6 +10,7 @@
 #include <iterator>
 #include <limits>
 #include <new>
+#include <ranges>
 #include <stdexcept>
 
 #include <cassert>
@@ -57,14 +58,14 @@ struct basic_string {
     basic_string(basic_string_view<F> sv) {
         auto size = size_type {0};
 
-        for (auto cp : sv) {
+        for (auto cp : sv.code_points()) {
             size += E::encoded_size(cp);
         }
 
         auto data = init(size);
         auto end = data + size;
 
-        for (auto cp : sv) {
+        for (auto cp : sv.code_points()) {
             data = E::encode(cp, data);
         }
 
@@ -157,6 +158,18 @@ struct basic_string {
 
     constexpr auto back() const noexcept -> value_type {
         return *rbegin();
+    }
+
+    constexpr auto code_points() const noexcept {
+        return std::ranges::subrange {begin(), end()};
+    }
+
+    constexpr auto code_units() const noexcept {
+        if (is_large()) {
+            return std::ranges::subrange {m_large.begin, m_large.end};
+        } else {
+            return std::ranges::subrange {m_small.data(), m_small.data() + small_size()};
+        }
     }
 
     constexpr auto c_str() const noexcept -> const_pointer

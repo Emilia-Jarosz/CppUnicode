@@ -13,13 +13,10 @@ TEST_CASE("Default string view is empty", "[string_view]") {
     constexpr auto str = string_view {};
 
     STATIC_REQUIRE(str.empty());
-    STATIC_REQUIRE(str.size() == 0);
     STATIC_REQUIRE(str.length() == 0);
 
     STATIC_REQUIRE(str.cbegin() == str.cend());
     STATIC_REQUIRE(str.crbegin() == str.crend());
-
-    STATIC_REQUIRE(str.data() == nullptr);
 }
 
 TEST_CASE("String view properties", "[string_view]") {
@@ -27,7 +24,7 @@ TEST_CASE("String view properties", "[string_view]") {
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
     auto str = string_view {};
-    REQUIRE_NOTHROW(str = string_view {data.begin(), data.end()});
+    REQUIRE_NOTHROW(str = string_view {data.data(), data.data() + data.size()});
 
     CHECK_FALSE(str.empty());
     CHECK(str.size() == data.size());
@@ -40,7 +37,7 @@ TEST_CASE("String view properties", "[string_view]") {
     CHECK(str.front() == *(--str.rend()));
     CHECK(str.back() == *str.rbegin());
     CHECK(str.back() == *(--str.end()));
-    REQUIRE(str.data() == data.data());
+    REQUIRE(str.code_units().data() == data.data());
 }
 
 TEST_CASE("String view validating constructors", "[string_view]") {
@@ -78,6 +75,6 @@ TEST_CASE("String view validating constructors", "[string_view]") {
         data[i] = 0xFF;
 
         auto str = string_view {};
-        REQUIRE_THROWS_AS((str = string_view {data.begin(), data.end()}), unicode::parse_error);
+        REQUIRE_THROWS_AS((str = string_view {data.data(), data.data() + data.size()}), unicode::parse_error);
     }
 }

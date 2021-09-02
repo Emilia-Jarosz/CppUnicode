@@ -14,23 +14,20 @@ TEST_CASE("Default string is empty", "[string]") {
     auto str = string {};
 
     REQUIRE(str.empty());
-    REQUIRE(str.size() == 0);
     REQUIRE(str.length() == 0);
 
     REQUIRE(str.cbegin() == str.cend());
     REQUIRE(str.crbegin() == str.crend());
-
-    REQUIRE(str.data() == nullptr);
 }
 
 TEST_CASE("String properties", "[string]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
-    auto str = string {data.begin(), data.end()};
+    auto str = string {data.data(), data.data() + data.size()};
 
     CHECK_FALSE(str.empty());
-    CHECK(str.size() == data.size());
+    CHECK(str.code_units().size() == data.size());
     REQUIRE(str.length() == length);
 
     CHECK(std::distance(str.cbegin(), str.cend()) == (ptrdiff_t)length);
@@ -40,7 +37,7 @@ TEST_CASE("String properties", "[string]") {
     CHECK(str.front() == *(--str.rend()));
     CHECK(str.back() == *str.rbegin());
     CHECK(str.back() == *(--str.end()));
-    REQUIRE(str.data() != data.data());
+    REQUIRE(str.code_units().data() != data.data());
 }
 
 TEST_CASE("String validating constructors", "[string]") {
@@ -78,7 +75,7 @@ TEST_CASE("String validating constructors", "[string]") {
         data[i] = 0xFF;
 
         auto str = string {};
-        REQUIRE_THROWS_AS((str = string {data.begin(), data.end()}), unicode::parse_error);
+        REQUIRE_THROWS_AS((str = string {data.data(), data.data() + data.size()}), unicode::parse_error);
     }
 }
 
@@ -86,7 +83,7 @@ TEST_CASE("String converting constructor", "[string]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
-    auto str_1 = string {data.begin(), data.end()};
+    auto str_1 = string {data.data(), data.data() + data.size()};
     auto str_2 = utf16be_string {str_1};
 
     CHECK(str_1.length() == str_2.length());
@@ -98,7 +95,7 @@ TEST_CASE("String copy and move constructors", "[string]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
-    auto str_1 = string {data.begin(), data.end()};
+    auto str_1 = string {data.data(), data.data() + data.size()};
 
     SECTION("copy constructor") {
         auto str_2 = string {str_1};
@@ -109,18 +106,18 @@ TEST_CASE("String copy and move constructors", "[string]") {
     }
 
     SECTION("move constructor") {
-        auto ptr_1 = str_1.data();
-        auto size_1 = str_1.size();
+        auto ptr_1 = str_1.code_units().data();
+        auto size_1 = str_1.code_units().size();
         auto length_1 = str_1.length();
 
         auto str_2 = string {std::move(str_1)};
 
-        CHECK(str_2.data() == ptr_1);
-        CHECK(str_2.size() == size_1);
+        CHECK(str_2.code_units().data() == ptr_1);
+        CHECK(str_2.code_units().size() == size_1);
         CHECK(str_2.length() == length_1);
 
-        CHECK(str_1.data() == nullptr);
-        CHECK(str_1.size() == 0);
+        CHECK(str_1.code_units().data() == nullptr);
+        CHECK(str_1.code_units().size() == 0);
         CHECK(str_1.length() == 0);
     }
 }
@@ -129,7 +126,7 @@ TEST_CASE("String copy and move assignment", "[string]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
-    auto str_1 = string {data.begin(), data.end()};
+    auto str_1 = string {data.data(), data.data() + data.size()};
     auto str_2 = string {};
 
     SECTION("copy assignment") {
@@ -141,18 +138,18 @@ TEST_CASE("String copy and move assignment", "[string]") {
     }
 
     SECTION("move assignment") {
-        auto ptr_1 = str_1.data();
-        auto size_1 = str_1.size();
+        auto ptr_1 = str_1.code_units().data();
+        auto size_1 = str_1.code_units().size();
         auto length_1 = str_1.length();
 
         str_2 = std::move(str_1);
 
-        CHECK(str_2.data() == ptr_1);
-        CHECK(str_2.size() == size_1);
+        CHECK(str_2.code_units().data() == ptr_1);
+        CHECK(str_2.code_units().size() == size_1);
         CHECK(str_2.length() == length_1);
 
-        CHECK(str_1.data() == nullptr);
-        CHECK(str_1.size() == 0);
+        CHECK(str_1.code_units().data() == nullptr);
+        CHECK(str_1.code_units().size() == 0);
         CHECK(str_1.length() == 0);
     }
 }
@@ -161,11 +158,11 @@ TEST_CASE("String to string view conversion operator", "[string]") {
     auto length = GENERATE(range<size_t>(1, 100));
     auto data = GENERATE_COPY(take(100, random_string<unicode::utf8>(length)));
 
-    auto str = string {data.begin(), data.end()};
+    auto str = string {data.data(), data.data() + data.size()};
     auto sv = static_cast<string_view>(str);
 
-    CHECK(str.data() == sv.data());
-    CHECK(str.size() == sv.size());
+    CHECK(str.code_units().data() == sv.code_units().data());
+    CHECK(str.code_units().size() == sv.code_units().size());
     CHECK(str.length() == sv.length());
 }
 
@@ -176,25 +173,25 @@ TEST_CASE("String swap", "[string]") {
     auto data_1 = data[0];
     auto data_2 = data[1];
 
-    auto str_1 = string {data_1.begin(), data_1.end()};
+    auto str_1 = string {data_1.data(), data_1.data() + data_1.size()};
 
-    auto ptr_1 = str_1.data();
-    auto size_1 = str_1.size();
+    auto ptr_1 = str_1.code_units().data();
+    auto size_1 = str_1.code_units().size();
     auto length_1 = str_1.length();
 
-    auto str_2 = string {data_2.begin(), data_2.end()};
+    auto str_2 = string {data_2.data(), data_2.data() + data_2.size()};
 
-    auto ptr_2 = str_2.data();
-    auto size_2 = str_2.size();
+    auto ptr_2 = str_2.code_units().data();
+    auto size_2 = str_2.code_units().size();
     auto length_2 = str_2.length();
 
     str_1.swap(str_2);
 
-    CHECK(str_1.data() == ptr_2);
-    CHECK(str_1.size() == size_2);
+    CHECK(str_1.code_units().data() == ptr_2);
+    CHECK(str_1.code_units().size() == size_2);
     CHECK(str_1.length() == length_2);
 
-    CHECK(str_2.data() == ptr_1);
-    CHECK(str_2.size() == size_1);
+    CHECK(str_2.code_units().data() == ptr_1);
+    CHECK(str_2.code_units().size() == size_1);
     CHECK(str_2.length() == length_1);
 }

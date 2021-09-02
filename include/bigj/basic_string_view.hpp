@@ -5,6 +5,7 @@
 #include "unicode/reverse_iterator.hpp"
 
 #include <iterator>
+#include <ranges>
 
 #include <cassert>
 
@@ -89,6 +90,14 @@ struct basic_string_view {
 
     constexpr auto back() const noexcept -> value_type {
         return *rbegin();
+    }
+
+    constexpr auto code_points() const noexcept {
+        return std::ranges::subrange {begin(), end()};
+    }
+
+    constexpr auto code_units() const noexcept {
+        return std::ranges::subrange {m_begin, m_end};
     }
 
     // Capacity
