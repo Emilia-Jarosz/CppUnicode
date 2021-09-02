@@ -160,15 +160,15 @@ struct basic_string {
         return *rbegin();
     }
 
-    constexpr auto code_points() const noexcept {
-        return std::ranges::subrange {begin(), end()};
+    constexpr auto code_points() const noexcept -> std::ranges::subrange<const_iterator> {
+        return {begin(), end()};
     }
 
-    constexpr auto code_units() const noexcept {
+    constexpr auto code_units() const noexcept -> std::ranges::subrange<const_pointer> {
         if (is_large()) {
-            return std::ranges::subrange {m_large.begin, m_large.end};
+            return {m_large.begin, m_large.end};
         } else {
-            return std::ranges::subrange {m_small.data(), m_small.data() + small_size()};
+            return {m_small.data(), m_small.data() + small_size()};
         }
     }
 
