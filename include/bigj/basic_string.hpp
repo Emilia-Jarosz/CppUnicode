@@ -193,6 +193,14 @@ struct basic_string {
     }
 
     constexpr auto length() const noexcept -> size_type {
+        if (is_large() && m_large.length()) {
+            return m_large.length();
+        } else {
+            return std::distance(begin(), end());
+        }
+    }
+
+    constexpr auto length() noexcept -> size_type {
         if (is_large()) {
             if (m_large.length()) {
                 return m_large.length();
@@ -207,6 +215,10 @@ struct basic_string {
     }
 
     constexpr auto size() const noexcept -> size_type {
+        return length();
+    }
+
+    constexpr auto size() noexcept -> size_type {
         return length();
     }
 
