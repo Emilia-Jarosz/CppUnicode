@@ -28,12 +28,19 @@ set(CPPUNICODE_HEADER_FILES
     unicode/detail/endian.hpp
     unicode/detail/error_code.hpp
     unicode/detail/exceptions.hpp
+    unicode/detail/validate_string.hpp
     unicode/encoding/utf8.hpp
     unicode/encoding/utf16.hpp
     unicode/encoding/utf32.hpp
+    unicode/code_point.hpp
+    unicode/config.hpp
     unicode/encoding.hpp
     unicode/iterator.hpp
+    unicode/reverse_iterator.hpp
     basic_string_view.hpp
+    basic_string.hpp
+    string_view.hpp
+    string.hpp
 )
 
 list(TRANSFORM CPPUNICODE_HEADER_FILES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/include/bigj/)
