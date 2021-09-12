@@ -90,8 +90,5 @@ struct utf16 {
 using utf16be = utf16<std::endian::big>;
 using utf16le = utf16<std::endian::little>;
 
-static_assert(encoding<utf16be>);
-static_assert(encoding<utf16le>);
-
 } // namespace unicode
 } // namespace bigj

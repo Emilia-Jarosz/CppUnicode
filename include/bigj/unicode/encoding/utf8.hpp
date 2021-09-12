@@ -180,7 +180,5 @@ struct utf8 {
     }
 };
 
-static_assert(encoding<utf8>);
-
 } // namespace unicode
 } // namespace bigj

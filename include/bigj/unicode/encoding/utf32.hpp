@@ -63,8 +63,5 @@ struct utf32 {
 using utf32be = utf32<std::endian::big>;
 using utf32le = utf32<std::endian::little>;
 
-static_assert(encoding<utf32be>);
-static_assert(encoding<utf32le>);
-
 } // namespace unicode
 } // namespace bigj
