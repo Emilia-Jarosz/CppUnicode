@@ -11,7 +11,6 @@ set(CPPUNICODE_TEST_TARGET_NAME ${PROJECT_NAME}Tests)
 ###################
 
 set(CPPUNICODE_TEST_SOURCE_FILES
-    detail/random_string_generator.cpp
     encoding/utf8.cpp
     encoding/utf16.cpp
     encoding/utf32.cpp

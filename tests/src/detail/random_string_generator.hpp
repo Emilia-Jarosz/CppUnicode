@@ -5,67 +5,38 @@
 #include <catch2/generators/catch_generators_adapters.hpp>
 #include <catch2/generators/catch_generators_random.hpp>
 
-#include <vector>
-
-template<bigj::unicode::encoding E>
-class RandomStringGenerator final
-    : public Catch::Generators::IGenerator<std::vector<typename E::code_unit>>
+inline auto random_code_points(size_t size)
+    -> Catch::Generators::GeneratorWrapper<std::vector<uint32_t>>
 {
-    using code_unit = typename E::code_unit;
-    using code_point = bigj::unicode::code_point;
+    using namespace Catch::Generators;
+    using enum bigj::unicode::error_code;
+    using utf32 = bigj::unicode::utf32<std::endian::native>;
 
-    auto make_rng() {
-        using namespace bigj::unicode;
-        using namespace Catch::Generators;
-        using utf32 = utf32<std::endian::native>;
-
-        return filter(
-            [](uint32_t cp) {
-                return utf32::validate(&cp, &cp + 1) == error_code::ok;
-            },
-            random<uint32_t>(0, 0x10FFFF)
-        );
-    }
-
-  public:
-
-    RandomStringGenerator(size_t length) : m_rng {make_rng()}, m_length {length} {
-        next();
-    }
-
-    auto get() const -> const std::vector<code_unit>& override {
-        return m_string;
-    }
-
-    auto next() -> bool override {
-        auto str = std::vector<code_unit> {};
-        str.reserve(m_length);
-
-        for (size_t i = 0; i < m_length; i++) {
-            auto cp = m_rng.get();
-            m_rng.next();
-
-            auto prev_size = str.size();
-            str.resize(str.size() + E::encoded_size(cp));
-            E::encode(cp, &str[prev_size]);
-        }
-
-        m_string = std::move(str);
-        return true;
-    }
-
-  private:
-    Catch::Generators::GeneratorWrapper<uint32_t> m_rng;
-    const size_t m_length;
-    std::vector<code_unit> m_string;
-};
+    return chunk(size, filter(
+        [](uint32_t cp) { return utf32::validate(&cp, &cp + 1) == ok; },
+        random<uint32_t>(0, 0x10FFFF)
+    ));
+}
 
 template<bigj::unicode::encoding E>
-Catch::Generators::GeneratorWrapper<std::vector<typename E::code_unit>>
-random_string(size_t length) {
-    using Catch::Generators::GeneratorWrapper;
+auto random_string(size_t length)
+    -> Catch::Generators::GeneratorWrapper<std::vector<typename E::code_unit>>
+{
+    using namespace Catch::Generators;
 
-    return GeneratorWrapper<std::vector<typename E::code_unit>>(
-        Catch::Detail::make_unique<RandomStringGenerator<E>>(length)
+    return map(
+        [](const auto& code_points) {
+            auto size = size_t {0};
+            for (auto cp : code_points) size += E::encoded_size(cp);
+
+            auto str = std::vector<typename E::code_unit> {};
+            str.resize(size);
+
+            auto data = str.data();
+            for (auto cp : code_points) data = E::encode(cp, data);
+
+            return str;
+        },
+        random_code_points(length)
     );
 }
