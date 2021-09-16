@@ -9,6 +9,8 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 using namespace bigj;
+using unicode::error_code;
+using unicode::utf8;
 
 TEST_CASE("Default string is empty", "[string]") {
     auto str = string {};
