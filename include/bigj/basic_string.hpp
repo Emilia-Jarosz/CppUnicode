@@ -192,15 +192,7 @@ struct basic_string {
         return is_empty();
     }
 
-    constexpr auto length() const noexcept -> size_type {
-        if (is_large() && m_large.length()) {
-            return m_large.length();
-        } else {
-            return std::distance(begin(), end());
-        }
-    }
-
-    constexpr auto length() noexcept -> size_type {
+    auto length() const noexcept -> size_type {
         if (is_large()) {
             if (m_large.length()) {
                 return m_large.length();
@@ -214,11 +206,7 @@ struct basic_string {
         }
     }
 
-    constexpr auto size() const noexcept -> size_type {
-        return length();
-    }
-
-    constexpr auto size() noexcept -> size_type {
+    auto size() const noexcept -> size_type {
         return length();
     }
 
@@ -315,12 +303,12 @@ struct basic_string {
 
     struct large_str {
 
-        constexpr auto length() const noexcept -> size_type {
+        auto length() const noexcept -> size_type {
             auto tmp = is_big_endian ? std::rotr(not_length, byte_bits) : not_length;
             return tmp ^ size_msb;
         }
 
-        constexpr auto length(size_type new_length) noexcept -> void {
+        auto length(size_type new_length) const noexcept -> void {
             assert(new_length <= max_length);
             auto tmp = new_length | size_msb;
             not_length = is_big_endian ? std::rotl(tmp, byte_bits) : tmp;
@@ -329,7 +317,7 @@ struct basic_string {
         pointer begin;
         pointer end;
         ref_count* refs;
-        size_type not_length;
+        mutable size_type not_length;
     };
 
     static constexpr auto byte_count = offsetof(large_str, not_length) + sizeof(size_type);
