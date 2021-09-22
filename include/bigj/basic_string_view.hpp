@@ -6,6 +6,7 @@
 
 #include <iterator>
 #include <ranges>
+#include <utility>
 
 #include <cassert>
 
@@ -116,6 +117,13 @@ struct basic_string_view {
 
     constexpr auto max_size() const noexcept -> size_type {
         return std::numeric_limits<size_type>::max() / sizeof(code_unit);
+    }
+
+    // Modifiers
+
+    constexpr auto swap(basic_string_view& sv) noexcept -> void {
+        std::swap(m_begin, sv.m_begin);
+        std::swap(m_end, sv.m_end);
     }
 
   private:
