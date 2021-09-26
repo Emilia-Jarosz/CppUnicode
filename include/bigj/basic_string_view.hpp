@@ -6,6 +6,7 @@
 
 #include <iterator>
 #include <ranges>
+#include <stdexcept>
 #include <utility>
 
 #include <cassert>
@@ -126,7 +127,52 @@ struct basic_string_view {
         std::swap(m_end, sv.m_end);
     }
 
+    constexpr auto remove_prefix(const_iterator new_begin) -> void {
+        auto new_begin_ptr = new_begin.address();
+        
+        if (new_begin_ptr >= m_begin && new_begin_ptr <= m_end) {
+            m_begin = new_begin_ptr;
+        } else {
+            throw std::out_of_range {"new begin iterator is out of range"};
+        }
+    }
+
+    constexpr auto remove_suffix(const_iterator new_end) -> void {
+        auto new_end_ptr = new_end.address();
+
+        if (new_end_ptr >= m_begin && new_end_ptr <= m_end) {
+            m_end = new_end_ptr;
+        } else {
+            throw std::out_of_range {"new end iterator is out of range"};
+        }
+    }
+
+    // Operations
+
+    constexpr auto substring(const_iterator begin, const_iterator end) const
+        -> basic_string_view
+    {
+        auto begin_ptr = begin.address();
+        auto end_ptr = end.address();
+
+        if (
+            begin_ptr >= m_begin && begin_ptr <= m_end
+            && end_ptr >= m_begin && end_ptr <= m_end
+            && end_ptr >= begin_ptr
+        ) {
+            auto substr = basic_string_view {};
+            substr.m_begin = begin_ptr;
+            substr.m_end = end_ptr;
+            return substr;
+        } else {
+            throw std::out_of_range {"invalid substring"};
+        }
+    }
+
   private:
+    template<unicode::encoding>
+    friend class basic_string;
+
     const_pointer m_begin = nullptr;
     const_pointer m_end = nullptr;
 };

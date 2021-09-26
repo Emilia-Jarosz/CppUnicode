@@ -183,7 +183,12 @@ struct basic_string {
     }
 
     constexpr operator basic_string_view<E>() const noexcept {
-        return basic_string_view<E> {begin(), end()};
+        auto data = code_units();
+
+        auto sv = basic_string_view<E> {};
+        sv.m_begin = data.begin();
+        sv.m_end = data.end();
+        return sv;
     }
 
     // Capacity
@@ -227,7 +232,145 @@ struct basic_string {
         std::swap_ranges(m_bytes.begin(), m_bytes.end(), other.m_bytes.begin());
     }
 
+    auto remove_prefix(const_iterator new_begin) -> void {
+        auto begin_ptr = code_units().begin();
+        auto end_ptr = code_units().end();
+        auto new_begin_ptr = new_begin.address();
+
+        if (new_begin_ptr >= begin_ptr && new_begin_ptr <= end_ptr) {
+            auto size = end_ptr - new_begin_ptr;
+
+            if (size > max_small_capacity) {
+                m_large.begin = new_begin_ptr;
+            } else if (is_large()) {
+                auto tmp = basic_string {std::move(*this)};
+                auto data = init_small(size);
+                std::copy(new_begin_ptr, end_ptr, data);
+            } else {
+                std::shift_left(begin_ptr, end_ptr, new_begin_ptr - begin_ptr);
+                small_size(size);
+
+                if constexpr (unicode::config::null_terminators) {
+                    *(begin_ptr + size) = null_terminator;
+                }
+            }
+        } else {
+            throw std::out_of_range {"new begin iterator is out of range"};
+        }
+    }
+
+    auto remove_suffix(const_iterator new_end) -> void {
+        auto begin_ptr = code_units().begin();
+        auto end_ptr = code_units().end();
+        auto new_end_ptr = new_end.address();
+
+        if (new_end_ptr >= begin_ptr && new_end_ptr <= end_ptr) {
+            auto size = new_end_ptr - begin_ptr;
+
+            if (size > max_small_capacity) {
+                if constexpr (unicode::config::null_terminators) {
+                    auto tmp = basic_string {std::move(*this)};
+                    auto data = init_large(size);
+                    std::copy(begin_ptr, new_end_ptr, data);
+                } else {
+                    m_large.end = new_end_ptr;
+                }
+            } else if (is_large()) {
+                auto tmp = basic_string {std::move(*this)};
+                auto data = init_small(size);
+                std::copy(begin_ptr, new_end_ptr, data);
+            } else {
+                small_size(size);
+
+                if constexpr (unicode::config::null_terminators) {
+                    *new_end_ptr = null_terminator;
+                }
+            }
+        } else {
+            throw std::out_of_range {"new end iterator is out of range"};
+        }
+    }
+
+    // Operations
+
+    auto substring(const_iterator begin, const_iterator end)
+        const -> basic_string
+    {
+        auto begin_ptr = begin.address();
+        auto end_ptr = end.address();
+
+        validate_substring(begin_ptr, end_ptr);
+
+        auto substr = basic_string {};
+        auto size = end_ptr - begin_ptr;
+
+        if (size > max_small_capacity) {
+            if constexpr (unicode::config::null_terminators) {
+                if (end_ptr != m_large.end) {
+                    auto data = substr.init_large(size);
+                    std::copy(begin_ptr, end_ptr, data);
+                    return substr;
+                }
+            }
+
+            substr.m_large.begin = begin_ptr;
+            substr.m_large.end = end_ptr;
+            substr.m_large.refs = m_large.refs;
+            substr.m_large.length(0);
+            (*m_large.refs)++;
+        } else {
+            auto data = substr.init_small(size);
+            std::copy(begin_ptr, end_ptr, data);
+        }
+
+        return substr;
+    }
+
+    auto substring_copy(const_iterator begin, const_iterator end)
+        const -> basic_string
+    {
+        auto begin_ptr = begin.address();
+        auto end_ptr = end.address();
+        
+        validate_substring(begin_ptr, end_ptr);
+
+        auto substr = basic_string {};
+        auto size = end_ptr - begin_ptr;
+        auto data = substr.init(size);
+        std::copy(begin_ptr, end_ptr, data);
+        return substr;
+    }
+
+    auto substring_view(const_iterator begin, const_iterator end)
+        const -> basic_string_view<E>
+    {
+        auto begin_ptr = begin.address();
+        auto end_ptr = end.address();
+
+        validate_substring(begin_ptr, end_ptr);
+
+        auto substr = basic_string_view<E> {};
+        substr.m_begin = begin_ptr;
+        substr.m_end = end_ptr;
+        return substr;
+    }
+
   private:
+
+    constexpr auto validate_substring(const_pointer begin, const_pointer end)
+        const -> void
+    {
+        auto str_begin = code_units().begin();
+        auto str_end = code_units().end();
+
+        if (
+            begin < str_begin || begin > str_end
+            || end < str_begin || end > str_end
+            || end < begin
+        ) [[unlikely]] {
+            throw std::out_of_range {"invalid substring"};
+        }
+    }
 
     using ref_count = std::atomic_size_t;
 
